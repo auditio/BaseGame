@@ -6,35 +6,43 @@ package org.auditio.game;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.util.Log;
 
 import java.util.Random;
 
 public class Statement {
-    private Bitmap bitmap;
-    private Bitmap right;
-    private Bitmap wrong;
+    private static final String TAG = MainThread.class.getSimpleName();
 
+    private Bitmap bitmap;
     // Store if the statement generated is wright or wrong
 
     /*
      * 0 = correct statement
      * 1 = wrong statement
      */
-    private int correctAns;
+    private int correctAns = 2;
+    /*
+     * 0 = correct statement
+     * 1 = wrong statement
+     */
+    private int chosenAns = 2;
     private Number[] nums;
-    private Equation equation;
-
 
     private int x;
     private int y;
-    private boolean touched;
+    private boolean touched = false;
     private Speed speed;
+    public String statement;
+    private boolean destroy = false;
 
     public Statement(Bitmap bitmap, int x, int y) {
         this.bitmap = bitmap;
         this.x = x;
         this.y = y;
-        this.speed = new Speed(20, 20);
+        this.speed = new Speed(5, 5);
+
+        decideRightWrong();
+        this.statement = generateStatement();
     }
 
     public Bitmap getBitmap() {
@@ -61,7 +69,32 @@ public class Statement {
         this.y = y;
     }
 
-    public String generateStatement(){
+    public boolean destroy () { return destroy; }
+
+    public void stopMoving(){
+        this.speed.setYv(0);
+    }
+
+    public Speed getSpeed() {
+        return speed;
+    }
+
+    public boolean isTouched() {
+        return touched;
+    }
+
+    private void createStatementBlob(){
+        // Put the statement in a bitmap configuration
+    }
+
+
+
+    /**
+      * Generate the equation to be displayed.
+     *  Set CorrectAns = 0 means equation is true
+     *      CorrectAns = 1 means equation is false
+     */
+    private String generateStatement(){
         this.nums = new Number [2];
         for (int i = 0; i < nums.length; i++){
             nums[i] = new Number();
@@ -106,41 +139,87 @@ public class Statement {
         return (new Number(rand.nextInt(9) % 2)).getNum();
     }
 
-
-    public boolean isTouched() {
-        return touched;
-    }
-
     public void setTouched(boolean touched) {
         this.touched = touched;
+        Log.d(TAG, "Touched statement x#" + x + " y#" + y);
     }
 
     public void draw(Canvas canvas) {
         canvas.drawBitmap(bitmap, x - (bitmap.getWidth() / 2), y - (bitmap.getHeight() / 2), null);
     }
 
+
+    /* Calculate square areas at the end of the statement blob which will contain tick or cross mark
+     *
+     * Tick coordinate: x = bitmap.x + bitmap.y, y = bitmap.y
+     *
+     * Cross coordinate: x = bitmap.witdh - bitmap.y, y = bitmap.y
+     *
+     *
+     * */
     public void handleActionDown(int eventX, int eventY) {
-        if (eventX >= (x - bitmap.getWidth() / 2) && (eventX <= (x + bitmap.getWidth() / 2))) {
-            if (eventY >= (y - bitmap.getHeight() / 2) && (y <= (y + bitmap.getHeight() / 2))) {
-                // droid touched
-                setTouched(true);
-            } else {
-                setTouched(false);
-            }
-        } else {
+        //Log.d(TAG, statement);
+        // Check if tick was clicked
+        if((eventX >= (x - bitmap.getWidth()/2) && (eventX <= x - bitmap.getWidth()/2 + bitmap.getHeight()))){
+            if((eventY >= (y - bitmap.getHeight()/2)) && (eventY <= y + bitmap.getHeight()/2)){
+                // Tick mark was clicked
+                chosenAns = 0;
+                setTouched (true);
+
+                Log.d(TAG, "PICKED TICK");
+            }else
+                setTouched (false);
+
+        } else if ((eventX >= x + bitmap.getWidth()/2 - bitmap.getHeight()) && (eventX <= (x + bitmap.getWidth()/2))){
+            if((eventY >= (y - bitmap.getHeight()/2)) && (eventY <= y + bitmap.getHeight()/2)){
+                // Cross mark was clicked
+                chosenAns = 1;
+                setTouched (true);
+
+                Log.d(TAG, "PICKED CROSS");
+            } else
+                setTouched (false);
+
+        } else
             setTouched(false);
-        }
+
+
+        int rightXlower = x - bitmap.getWidth()/2;
+        int rightXupper = x - bitmap.getWidth()/2 + bitmap.getHeight();
+        int yLower = y - bitmap.getHeight()/2;
+        int yUpper = y + bitmap.getHeight()/2;
+
+        int wrongXlower = x + bitmap.getWidth()/2 - bitmap.getHeight();
+        int wrongXupper = x + bitmap.getWidth()/2;
+
+        Log.d(TAG, "---------------------------------------------------");
+        Log.d(TAG, "Right X: " + rightXlower + " X:" + rightXupper + " Wrong X: " + wrongXlower + " X:" + wrongXupper);
+        Log.d(TAG, "Y lower:" + wrongXlower + " upper:" + wrongXupper);
+        Log.d(TAG, "---------------------------------------------------");
+
+        // At this point we are ready to compare if the user chose the right/wrong answer
+        clearRight();
 
     }
 
     public void update() {
-        if (!touched) {
-            //x += (speed.getXv() * speed.getxDirection());
-            y += (speed.getYv() * speed.getyDirection());
-        }
+        y += (speed.getYv() * speed.getyDirection());
     }
 
-    public Speed getSpeed() {
-        return speed;
+    private void clearRight(){
+        // Increment total count
+
+        if(chosenAns == correctAns) {
+            //Increment score points
+            Log.d(TAG, "RIGHT!!!");
+            destroyStatement();
+        }else
+            Log.d(TAG, "WRONG! ChosenAns:" + chosenAns);
     }
+
+    private void destroyStatement(){
+        // Make the statement disappear
+        destroy = true;
+    }
+
 }

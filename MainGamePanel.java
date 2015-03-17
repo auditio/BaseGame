@@ -9,28 +9,52 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.content.Context;
 import android.graphics.Color;
+import android.net.NetworkInfo;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.util.Log;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.ListIterator;
+
 
 public class MainGamePanel extends SurfaceView implements
         SurfaceHolder.Callback{
 
+    private final int MAX_STATEMENTS = 10;
+    private final int OFFSET = 5;
+
     private MainThread thread;
     private static final String TAG = MainThread.class.getSimpleName();
-    private Statement statement;
 
+    /*
+     * Create an array of statements of size MAX_STATEMENTS
+     * this will be the maximum number of statements that one
+     * can get wrong before level ends
+     */
+
+    private LinkedList <Statement> statementList = new LinkedList<Statement>();
+    public Score score;
 
     public MainGamePanel(Context context){
         super (context);
 
         getHolder().addCallback(this);
 
-        statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.droid_1), 0, 0);
 
-        //Log.d(TAG, "Initial Height: " + getHeight());
+        for (int i = 0; i < MAX_STATEMENTS; i++) {
+
+            Statement statement;
+            statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0);
+
+            // Add to the list of statements
+            statementList.add(statement);
+        }
+
+        // Initialize empty score board
+        score = new Score();
 
         // create game loop thread
         thread = new MainThread(getHolder(), this);
@@ -39,23 +63,37 @@ public class MainGamePanel extends SurfaceView implements
     }
 
     @Override
-
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
     }
 
 
-
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        // Need to set initial coordinate again since the view isn't created when
-        // MainGamePanel was instantiated so getHeight() would
-        statement.setX(50);
-        statement.setY(getHeight());
+        // Keep adding new statements if there is room
+        ListIterator<Statement> list = statementList.listIterator();
+
+        int count = 0;
+
+        while (list.hasNext()){
+            Statement s = list.next();
+
+
+            s.setX(getWidth() / 2);
+            s.setY(getHeight() + (++count * s.getBitmap().getHeight()) + OFFSET);
+
+            if (count == 1){
+                Log.d(TAG, "Statement height: " + s.getBitmap().getHeight() + " Width: " + s.getBitmap().getWidth() );
+            }
+            //int height = getHeight() + (++count * s.getBitmap().getHeight()) + OFFSET;
+            //Log.d(TAG, "Height = " + height);
+        }
+
+        Log.d(TAG, "Width = " + getWidth() + " Height = " + getHeight());
+
         thread.setRunning(true);
         thread.start();
     }
-
 
 
     @Override
@@ -78,73 +116,79 @@ public class MainGamePanel extends SurfaceView implements
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        Log.d(TAG, "Coords: x=" + event.getX() + ", y=" + event.getY());
 
-        if (event.getAction() == MotionEvent.ACTION_DOWN){
-            // Delegate event handling to the droid
-            statement.handleActionDown((int)event.getX(), (int)event.getY());
+        ListIterator<Statement> list = statementList.listIterator();
 
-            // check if in the lower part of the screen we exit
-            if (event.getY() > getHeight() - 50){
-                thread.setRunning(false);
-                ((Activity)getContext()).finish();
-            } else {
-                Log.d (TAG, "Coords: x=" + event.getX() + ", y=" + event.getY());
+        int count = 0;
+
+        while (list.hasNext()){
+            Statement s = list.next();
+
+            Log.d(TAG, ++count +  "." + s.statement);
+
+            if(!s.isTouched()){
+                if (event.getAction() == MotionEvent.ACTION_DOWN){
+                    // Delegate event handling to the droid
+                    s.handleActionDown((int)event.getX(), (int)event.getY());
+
+                    // check if in the lower part of the screen we exit
+                    if (event.getY() > getHeight() - 10){
+                        thread.setRunning(false);
+                        ((Activity)getContext()).finish();
+                    }
+                }
             }
         }
 
-        if (event.getAction() == MotionEvent.ACTION_MOVE){
-            // the gestures
-            if(statement.isTouched()){
-                // the droid was picked up and being dragged
-                statement.setX((int)event.getX());
-                statement.setY((int)event.getY());
-            }
-        }
-
-        //return super.onTouchEvent(event);
 
         return true;
 
     }
 
+
     @Override
     protected void onDraw(Canvas canvas) {
         // fills the canvas with black
         canvas.drawColor(Color.BLACK);
-        statement.draw(canvas);
+
+        //Iterate through statementList and draw
+        ListIterator<Statement> list = statementList.listIterator();
+
+        while (list.hasNext()){
+            list.next().draw(canvas);
+        }
+
+
     }
 
+
     public void update() {
-        // check collision with right wall if heading right
-        /*if (droid.getSpeed().getxDirection() == Speed.DIRECTION_RIGHT
-                && droid.getX() + droid.getBitmap().getWidth() / 2 >= getWidth()) {
-            droid.getSpeed().toggleXDirection();
+
+        // Keep adding new statements if there is room
+        ListIterator<Statement> list = statementList.listIterator();
+
+        int count = 0;
+
+        while (list.hasNext()){
+            // check collision with top wall if heading up
+            Statement s = list.next();
+
+            if(s.destroy()){
+                // pop statement from the linkedlist
+                list.remove();
+
+            } else if (s.getSpeed().getyDirection() == Speed.DIRECTION_UP
+                    && s.getY() - s.getBitmap().getHeight() / 2 <= 250 + (++count * s.getBitmap().getHeight() + OFFSET)) {
+
+                s.stopMoving();
+                //statement.getSpeed().toggleYDirection();
+
+            }
+
+            // Update the moving statements
+            s.update();
         }
-
-        // check collision with left wall if heading left
-        /*if (droid.getSpeed().getxDirection() == Speed.DIRECTION_LEFT
-                && droid.getX() - droid.getBitmap().getWidth() / 2 <= 0) {
-            droid.getSpeed().toggleXDirection();
-        }*/
-
-        // check collision with bottom wall if heading down
-        if (statement.getSpeed().getyDirection() == Speed.DIRECTION_DOWN
-                && statement.getY() + statement.getBitmap().getHeight() / 2 >= getHeight()) {
-
-            statement.getSpeed().toggleYDirection();
-
-        }
-
-        // check collision with top wall if heading up
-        if (statement.getSpeed().getyDirection() == Speed.DIRECTION_UP
-                && statement.getY() - statement.getBitmap().getHeight() / 2 <= 0) {
-            statement.getSpeed().toggleYDirection();
-
-        }
-
-        // Update the lone droid
-        statement.update();
-
     }
 
 }
