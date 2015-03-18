@@ -9,13 +9,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.content.Context;
 import android.graphics.Color;
-import android.net.NetworkInfo;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.util.Log;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -24,7 +22,7 @@ public class MainGamePanel extends SurfaceView implements
         SurfaceHolder.Callback{
 
     private final int MAX_STATEMENTS = 10;
-    private final int OFFSET = 5;
+    private final int OFFSET = 10;
 
     private MainThread thread;
     private static final String TAG = MainThread.class.getSimpleName();
@@ -36,18 +34,20 @@ public class MainGamePanel extends SurfaceView implements
      */
 
     private LinkedList <Statement> statementList = new LinkedList<Statement>();
+    private Glyphs glyphs;
     public Score score;
 
     public MainGamePanel(Context context){
         super (context);
 
         getHolder().addCallback(this);
+        this.glyphs = new Glyphs(BitmapFactory.decodeResource(getResources(), R.drawable.glyphs_green));
 
 
         for (int i = 0; i < MAX_STATEMENTS; i++) {
 
             Statement statement;
-            statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0);
+            statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, glyphs);
 
             // Add to the list of statements
             statementList.add(statement);
@@ -80,7 +80,7 @@ public class MainGamePanel extends SurfaceView implements
 
 
             s.setX(getWidth() / 2);
-            s.setY(getHeight() + (++count * s.getBitmap().getHeight()) + OFFSET);
+            s.setY(getHeight() + (++count * s.getBitmap().getHeight()) + OFFSET * count);
 
             if (count == 1){
                 Log.d(TAG, "Statement height: " + s.getBitmap().getHeight() + " Width: " + s.getBitmap().getWidth() );
@@ -120,12 +120,10 @@ public class MainGamePanel extends SurfaceView implements
 
         ListIterator<Statement> list = statementList.listIterator();
 
-        int count = 0;
+
 
         while (list.hasNext()){
             Statement s = list.next();
-
-            Log.d(TAG, ++count +  "." + s.statement);
 
             if(!s.isTouched()){
                 if (event.getAction() == MotionEvent.ACTION_DOWN){
@@ -174,16 +172,22 @@ public class MainGamePanel extends SurfaceView implements
             // check collision with top wall if heading up
             Statement s = list.next();
 
+            int stopAt = 250 + (++count * s.getBitmap().getHeight() + OFFSET * count);
+
             if(s.destroy()){
                 // pop statement from the linkedlist
                 list.remove();
 
             } else if (s.getSpeed().getyDirection() == Speed.DIRECTION_UP
-                    && s.getY() - s.getBitmap().getHeight() / 2 <= 250 + (++count * s.getBitmap().getHeight() + OFFSET)) {
+                    && s.getY() - s.getBitmap().getHeight() / 2 <= stopAt) {
+
 
                 s.stopMoving();
                 //statement.getSpeed().toggleYDirection();
 
+            } else {
+                // Check if something above was cleared up. If so, start moving again
+                s.getSpeed().setYv(5);
             }
 
             // Update the moving statements

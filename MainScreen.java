@@ -24,8 +24,6 @@ public class MainScreen extends Activity {
 
     private static final String TAG = MainThread.class.getSimpleName();
 
-    public final static String EXTRA_MESSAGE = "org.auditio.game.MESSAGE";
-
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.

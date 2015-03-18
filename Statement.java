@@ -5,6 +5,7 @@ package org.auditio.game;
  */
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.util.Log;
 
@@ -35,7 +36,9 @@ public class Statement {
     public String statement;
     private boolean destroy = false;
 
-    public Statement(Bitmap bitmap, int x, int y) {
+    private Glyphs glyphs;
+
+    public Statement(Bitmap bitmap, int x, int y, Glyphs glyphs) {
         this.bitmap = bitmap;
         this.x = x;
         this.y = y;
@@ -43,6 +46,10 @@ public class Statement {
 
         decideRightWrong();
         this.statement = generateStatement();
+        // Load the glyph resources
+        this.glyphs = glyphs;
+
+        Log.d(TAG, statement);
     }
 
     public Bitmap getBitmap() {
@@ -50,7 +57,7 @@ public class Statement {
     }
 
     public void setBitmap(Bitmap bitmap) {
-        this.bitmap = this.bitmap;
+        this.bitmap = bitmap;
     }
 
     public int getX() {
@@ -145,7 +152,12 @@ public class Statement {
     }
 
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(bitmap, x - (bitmap.getWidth() / 2), y - (bitmap.getHeight() / 2), null);
+        int x = this.x - (bitmap.getWidth() / 2);
+        int y = this.y - (bitmap.getHeight() / 2);
+
+        canvas.drawBitmap(bitmap, x, y, null);
+        //Log.d(TAG, "** STATEMENT: " + statement);
+        glyphs.drawString(canvas, statement, this.x, this.y);
     }
 
 
@@ -166,7 +178,7 @@ public class Statement {
                 chosenAns = 0;
                 setTouched (true);
 
-                Log.d(TAG, "PICKED TICK");
+                Log.d(TAG, "* PICKED TICK *");
             }else
                 setTouched (false);
 
@@ -176,7 +188,7 @@ public class Statement {
                 chosenAns = 1;
                 setTouched (true);
 
-                Log.d(TAG, "PICKED CROSS");
+                Log.d(TAG, " * PICKED CROSS *");
             } else
                 setTouched (false);
 

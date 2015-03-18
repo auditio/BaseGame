@@ -1,4 +1,4 @@
-package org.auditio.game.util;
+package org.auditio.game.util.util;
 
 import android.app.Activity;
 import android.view.View;

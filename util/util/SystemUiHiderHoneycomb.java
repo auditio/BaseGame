@@ -1,4 +1,4 @@
-package org.auditio.game.util;
+package org.auditio.game.util.util;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -7,20 +7,20 @@ import android.view.View;
 import android.view.WindowManager;
 
 /**
- * An API 11+ implementation of {@link SystemUiHider}. Uses APIs available in
- * Honeycomb and later (specifically {@link View#setSystemUiVisibility(int)}) to
+ * An API 11+ implementation of {@link org.auditio.game.util.util.SystemUiHider}. Uses APIs available in
+ * Honeycomb and later (specifically {@link android.view.View#setSystemUiVisibility(int)}) to
  * show and hide the system UI.
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class SystemUiHiderHoneycomb extends SystemUiHiderBase {
     /**
-     * Flags for {@link View#setSystemUiVisibility(int)} to use when showing the
+     * Flags for {@link android.view.View#setSystemUiVisibility(int)} to use when showing the
      * system UI.
      */
     private int mShowFlags;
 
     /**
-     * Flags for {@link View#setSystemUiVisibility(int)} to use when hiding the
+     * Flags for {@link android.view.View#setSystemUiVisibility(int)} to use when hiding the
      * system UI.
      */
     private int mHideFlags;
@@ -40,7 +40,7 @@ public class SystemUiHiderHoneycomb extends SystemUiHiderBase {
 
     /**
      * Constructor not intended to be called by clients. Use
-     * {@link SystemUiHider#getInstance} to obtain an instance.
+     * {@link org.auditio.game.util.util.SystemUiHider#getInstance} to obtain an instance.
      */
     protected SystemUiHiderHoneycomb(Activity activity, View anchorView, int flags) {
         super(activity, anchorView, flags);
