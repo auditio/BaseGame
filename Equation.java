@@ -46,9 +46,9 @@ public class Equation {
                 eq = eq + String.valueOf(this.equation[i].getNum());
             }else {
                 if(this.equation[i].getNum() == 0)
-                    eq = eq + " + ";
+                    eq = eq + "+";
                 else
-                    eq = eq + " - ";
+                    eq = eq + "-";
 
             }
 

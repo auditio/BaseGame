@@ -46,18 +46,17 @@ public class Statement {
 
         decideRightWrong();
         this.statement = generateStatement();
+        Log.d(TAG, "EQUATION: " + this.statement);
+        Log.d(TAG, bitmap.getWidth() + " " + bitmap.getHeight());
+
         // Load the glyph resources
         this.glyphs = glyphs;
 
-        Log.d(TAG, statement);
+
     }
 
     public Bitmap getBitmap() {
         return bitmap;
-    }
-
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
     }
 
     public int getX() {
@@ -112,7 +111,7 @@ public class Statement {
 
         // Decide whether or not to return correct statement
         if (this.correctAns == 0)
-            return e.getEquation() + " = " + e.solution();
+            return e.getEquation() + "=" + e.solution();
         else{
           // Prepare wrong answer. Use the same decision picker to decide
           // whether or not to add or subtract
@@ -120,10 +119,10 @@ public class Statement {
 
             if(pick == 0) { // add one
                 int answer = e.solution() + 1;
-                return e.getEquation() + " = " + answer;
+                return e.getEquation() + "=" + answer;
             } else {
                 int answer = e.solution() - 1;
-                return e.getEquation() + " = " + answer;
+                return e.getEquation() + "=" + answer;
             }
         }
     }
@@ -152,12 +151,12 @@ public class Statement {
     }
 
     public void draw(Canvas canvas) {
-        int x = this.x - (bitmap.getWidth() / 2);
-        int y = this.y - (bitmap.getHeight() / 2);
+        int x = this.x - (this.bitmap.getWidth() / 2);
+        int y = this.y - (this.bitmap.getHeight() / 2);
 
         canvas.drawBitmap(bitmap, x, y, null);
         //Log.d(TAG, "** STATEMENT: " + statement);
-        glyphs.drawString(canvas, statement, this.x, this.y);
+        glyphs.drawString(canvas, this.statement, this.x/2, y);
     }
 
 

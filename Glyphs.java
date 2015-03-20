@@ -23,52 +23,41 @@ public class Glyphs {
 
         // the characters in the English alphabet
         private char[] charactersL = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-                'u', 'v', 'w', 'x', 'y', 'z' };
+            'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+            'u', 'v', 'w', 'x', 'y', 'z' };
         private char[] charactersU = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G',
-                'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-                'U', 'V', 'W', 'X', 'Y', 'Z' };
-        private char[] numbers = new char[] { '1', '2', '3', '4', '5', '6', '7',
-                '8', '9', '0' };
+            'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+            'U', 'V', 'W', 'X', 'Y', 'Z' };
+        private char[] numbers = new char[] { '0', '1', '2', '3', '4', '5', '6', '7',
+            '8', '9', '(', '!', '@', '#', '$', '%', '&', '.', ',', '?', ':', ';', ')', '+', '-', '=',' ' };
 
-    private char[] punctuations = new char[] { '!', '@', '#', '$', '^', '&', '*',
-            '(', ')', '-', '+', '=', '"', '.', ',', ':', ';', ' ' };
-
-
-    public Glyphs(Bitmap bitmap) {
+        public Glyphs(Bitmap bitmap) {
             super();
             this.bitmap = bitmap;
-            this.width = 8;
-            this.height = 12;
+            this.width = 26*3;
+            this.height = 43*3;
             // Cutting up the glyphs
             // Starting with the first row - lower cases
-            for (int i = 0; i < charactersL.length; i++) {
+            for (int i = 0; i < 26; i++) {
                 glyphs.put(charactersL[i], Bitmap.createBitmap(bitmap,
-                        (i * width), 0, width, height));
+                    (i * width), 0, width, height));
             }
             Log.d(TAG, "Lowercases initialised");
 
             // Continuing with the second row - upper cases
             // Note that the row starts at 15px - hardcoded
-            for (int i = 0; i < charactersU.length; i++) {
+            for (int i = 0; i < 26; i++) {
                 glyphs.put(charactersU[i], Bitmap.createBitmap(bitmap,
-                        (i * width), 15, width, height));
+                    (i * width), 45, width, height));
             }
             // row 3 for numbers
             Log.d(TAG, "Uppercases initialised");
             for (int i = 0; i < numbers.length; i++) {
                 glyphs.put(numbers[i], Bitmap.createBitmap(bitmap,
-                        (i * width), 30, width, height));
+                    (i * width), 258, width, height));
             }
             Log.d(TAG, "Numbers initialised");
 
-            for (int i = 0; i < punctuations.length; i++){
-                glyphs.put (punctuations[i], Bitmap.createBitmap(bitmap, 0 + (i * width), 45, width, height));
-            }
-        }
-
-        public Bitmap getBitmap() {
-            return bitmap;
         }
 
         /**
@@ -81,7 +70,9 @@ public class Glyphs {
             }
             for (int i = 0; i < text.length(); i++) {
                 Character ch = text.charAt(i);
+                //Log.d(TAG, "Trying to draw: " + ch);
                 if (glyphs.get(ch) != null) {
+                    //Log.d (TAG, "Drawing" + glyphs.get(ch).getWidth() + " " + glyphs.get(ch).getHeight());
                     canvas.drawBitmap(glyphs.get(ch), x + (i * width), y, null);
                 }
             }

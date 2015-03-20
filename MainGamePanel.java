@@ -21,7 +21,7 @@ import java.util.ListIterator;
 public class MainGamePanel extends SurfaceView implements
         SurfaceHolder.Callback{
 
-    private final int MAX_STATEMENTS = 10;
+    private final int MAX_STATEMENTS = 9;
     private final int OFFSET = 10;
 
     private MainThread thread;
@@ -41,10 +41,10 @@ public class MainGamePanel extends SurfaceView implements
         super (context);
 
         getHolder().addCallback(this);
-        this.glyphs = new Glyphs(BitmapFactory.decodeResource(getResources(), R.drawable.glyphs_green));
+        this.glyphs = new Glyphs(BitmapFactory.decodeResource(getResources(), R.drawable.glyphs));
 
 
-        for (int i = 0; i < MAX_STATEMENTS; i++) {
+        for (int i = statementList.size(); i < MAX_STATEMENTS; i++) {
 
             Statement statement;
             statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, glyphs);
@@ -85,8 +85,6 @@ public class MainGamePanel extends SurfaceView implements
             if (count == 1){
                 Log.d(TAG, "Statement height: " + s.getBitmap().getHeight() + " Width: " + s.getBitmap().getWidth() );
             }
-            //int height = getHeight() + (++count * s.getBitmap().getHeight()) + OFFSET;
-            //Log.d(TAG, "Height = " + height);
         }
 
         Log.d(TAG, "Width = " + getWidth() + " Height = " + getHeight());
@@ -148,7 +146,7 @@ public class MainGamePanel extends SurfaceView implements
     @Override
     protected void onDraw(Canvas canvas) {
         // fills the canvas with black
-        canvas.drawColor(Color.BLACK);
+        canvas.drawColor(Color.GRAY);
 
         //Iterate through statementList and draw
         ListIterator<Statement> list = statementList.listIterator();
@@ -163,7 +161,19 @@ public class MainGamePanel extends SurfaceView implements
 
     public void update() {
 
-        // Keep adding new statements if there is room
+        // If statements has been removed, regenerate
+        for (int i = statementList.size(); i < MAX_STATEMENTS; i++) {
+
+            Statement statement;
+            statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, glyphs);
+
+            statement.setX(getWidth() / 2);
+            statement.setY(getHeight() + (i * statement.getBitmap().getHeight()) + OFFSET * i);
+
+            // Add to the list of statements
+            statementList.add(statement);
+        }
+
         ListIterator<Statement> list = statementList.listIterator();
 
         int count = 0;
@@ -172,7 +182,7 @@ public class MainGamePanel extends SurfaceView implements
             // check collision with top wall if heading up
             Statement s = list.next();
 
-            int stopAt = 250 + (++count * s.getBitmap().getHeight() + OFFSET * count);
+            int stopAt = 280 + (++count * s.getBitmap().getHeight() + OFFSET * count);
 
             if(s.destroy()){
                 // pop statement from the linkedlist
