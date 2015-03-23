@@ -9,7 +9,6 @@ import java.util.Random;
  */
 public class Equation {
     Number [] equation;
-    private static final String TAG = MainThread.class.getSimpleName();
 
     public Equation (Number[] nums){
         this.equation = new Number[nums.length * 2 - 1];
@@ -58,7 +57,7 @@ public class Equation {
         return eq;
     }
 
-    public int solution(){
+    private int solution(){
         int answer = this.equation[0].getNum();
 
         for (int i = 1; i < this.equation.length; i++){

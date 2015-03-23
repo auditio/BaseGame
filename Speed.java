@@ -21,8 +21,6 @@ public class Speed {
         this.yv = 1;
     }
 
-
-
     public Speed(float xv, float yv) {
         this.xv = xv;
         this.yv = yv;

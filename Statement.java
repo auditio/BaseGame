@@ -109,19 +109,21 @@ public class Statement {
         Equation e = new Equation(nums);
         e.getEquation();
 
+        int solution = e.getSolution();
+
         // Decide whether or not to return correct statement
         if (this.correctAns == 0)
-            return e.getEquation() + "=" + e.solution();
+            return e.getEquation() + "=" + solution;
         else{
           // Prepare wrong answer. Use the same decision picker to decide
           // whether or not to add or subtract
             int pick = prepWrongAnswer();
 
             if(pick == 0) { // add one
-                int answer = e.solution() + 1;
+                int answer = solution + 1 + prepWrongAnswer();
                 return e.getEquation() + "=" + answer;
             } else {
-                int answer = e.solution() - 1;
+                int answer = solution - 1 - prepWrongAnswer();
                 return e.getEquation() + "=" + answer;
             }
         }
@@ -156,7 +158,7 @@ public class Statement {
 
         canvas.drawBitmap(bitmap, x, y, null);
         //Log.d(TAG, "** STATEMENT: " + statement);
-        glyphs.drawString(canvas, this.statement, this.x/2, y);
+        glyphs.drawString(canvas, this.statement, this.x, y + 20 );
     }
 
 

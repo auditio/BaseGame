@@ -34,8 +34,8 @@ public class Glyphs {
         public Glyphs(Bitmap bitmap) {
             super();
             this.bitmap = bitmap;
-            this.width = 26*3;
-            this.height = 43*3;
+            this.width = 23*3;
+            this.height = 30*3;
             // Cutting up the glyphs
             // Starting with the first row - lower cases
             for (int i = 0; i < 26; i++) {
@@ -54,7 +54,7 @@ public class Glyphs {
             Log.d(TAG, "Uppercases initialised");
             for (int i = 0; i < numbers.length; i++) {
                 glyphs.put(numbers[i], Bitmap.createBitmap(bitmap,
-                    (i * width), 258, width, height));
+                    (i * width), (90 * 3), width, height));
             }
             Log.d(TAG, "Numbers initialised");
 
@@ -68,6 +68,10 @@ public class Glyphs {
             if (canvas == null) {
                 Log.d(TAG, "Canvas is null");
             }
+
+            // Set new x to center the statement
+            x -= text.length() / 2 * 23*3;
+
             for (int i = 0; i < text.length(); i++) {
                 Character ch = text.charAt(i);
                 //Log.d(TAG, "Trying to draw: " + ch);
