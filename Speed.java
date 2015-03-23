@@ -14,14 +14,12 @@ public class Speed {
 
     private int xDirection = DIRECTION_RIGHT;
 
-    private int yDirection = DIRECTION_DOWN;
+    private int yDirection = DIRECTION_UP;
 
     public Speed() {
         this.xv = 1;
         this.yv = 1;
     }
-
-
 
     public Speed(float xv, float yv) {
         this.xv = xv;

@@ -81,8 +81,6 @@ public class MainThread extends Thread {
                         sleepTime += FRAME_PERIOD;
                         frameSkipped++;
                     }
-
-
                 }
             } finally {
                 // Unlock canvas unless its blank

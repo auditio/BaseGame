@@ -10,8 +10,8 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.content.Intent;
-import android.widget.EditText;
+import android.view.Window;
+import android.view.WindowManager;
 
 
 /**
@@ -23,8 +23,6 @@ import android.widget.EditText;
 public class MainScreen extends Activity {
 
     private static final String TAG = MainThread.class.getSimpleName();
-
-    public final static String EXTRA_MESSAGE = "org.auditio.game.MESSAGE";
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -58,16 +56,20 @@ public class MainScreen extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+         );
         setContentView(R.layout.activity_main_screen);
 
         Log.d(TAG, "View Added");
 
-        final View controlsView = findViewById(R.id.fullscreen_content);
-        final View contentView = findViewById(R.id.fullscreen_content);
+        //final View controlsView = findViewById(R.id.fullscreen_content);
+        //final View contentView = findViewById(R.id.fullscreen_content);
 
         // Set up an instance of SystemUiHider to control the system UI for
         // this activity.
-        mSystemUiHider = SystemUiHider.getInstance(this, contentView, HIDER_FLAGS);
+        /*mSystemUiHider = SystemUiHider.getInstance(this, contentView, HIDER_FLAGS);
         mSystemUiHider.setup();
 
         mSystemUiHider
@@ -92,15 +94,15 @@ public class MainScreen extends Activity {
                                         android.R.integer.config_shortAnimTime);
                             }
 
-                            /*controlsView.animate()
+                            controlsView.animate()
                                     .translationY(visible ? 0 : mControlsHeight)
-                                    .setDuration(mShortAnimTime);*/
+                                    .setDuration(mShortAnimTime);
                         } else {
                             // If the ViewPropertyAnimator APIs aren't
                             // available, simply show or hide the in-layout UI
                             // controls.
 
-                            //controlsView.setVisibility(visible ? View.VISIBLE : View.GONE);
+                            controlsView.setVisibility(visible ? View.VISIBLE : View.GONE);
                         }
 
                         if (visible && AUTO_HIDE) {
@@ -108,10 +110,10 @@ public class MainScreen extends Activity {
                             delayedHide(AUTO_HIDE_DELAY_MILLIS);
                         }
                     }
-                });
+                });*/
 
         // Set up the user interaction to manually show or hide the system UI.
-        contentView.setOnClickListener(new View.OnClickListener() {
+        /*contentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (TOGGLE_ON_CLICK) {
@@ -120,13 +122,13 @@ public class MainScreen extends Activity {
                     mSystemUiHider.show();
                 }
             }
-        });
+        });*/
 
 
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.start_button).setOnTouchListener(mDelayHideTouchListener);
+        //findViewById(R.id.start_button).setOnTouchListener(mDelayHideTouchListener);
     }
 
     @Override
@@ -159,7 +161,7 @@ public class MainScreen extends Activity {
     Runnable mHideRunnable = new Runnable() {
         @Override
         public void run() {
-            mSystemUiHider.hide();
+          //  mSystemUiHider.hide();
         }
     };
 
