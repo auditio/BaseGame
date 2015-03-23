@@ -1,0 +1,5 @@
+/Users/auditio/AndroidStudioProjects/Game/app/build/intermediates/classes/debug
+/Users/auditio/AndroidStudioProjects/Game/app/build/intermediates/pre-dexed/debug/support-annotations-21.0.3-10e2427b03f98bd131acfcb3363886edeb2088ea.jar
+/Users/auditio/AndroidStudioProjects/Game/app/build/intermediates/pre-dexed/debug/internal_impl-21.0.3-d06c90e85e594e20f430d0287bdadcf13cc32e2b.jar
+/Users/auditio/AndroidStudioProjects/Game/app/build/intermediates/pre-dexed/debug/classes-91935cd559812d0cf1a64bd38d84aa5b667b4869.jar
+/Users/auditio/AndroidStudioProjects/Game/app/build/intermediates/pre-dexed/debug/classes-bec32623a4dd99b0d6fa31182c16c80e6eaad1ea.jar
