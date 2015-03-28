@@ -35,8 +35,9 @@ public class Statement {
     private boolean destroy = false;
 
     private Glyphs glyphs;
+    private Score score;
 
-    public Statement(Bitmap bitmap, int x, int y, Glyphs glyphs) {
+    public Statement(Bitmap bitmap, int x, int y, Glyphs glyphs, Score score) {
         this.bitmap = bitmap;
         this.x = x;
         this.y = y;
@@ -49,7 +50,7 @@ public class Statement {
 
         // Load the glyph resources
         this.glyphs = glyphs;
-
+        this.score = score;
 
     }
 
@@ -156,7 +157,8 @@ public class Statement {
 
         canvas.drawBitmap(bitmap, x, y, null);
         //Log.d(TAG, "** STATEMENT: " + statement);
-        glyphs.drawString(canvas, this.statement, this.x, y + 20 );
+        if (!touched)
+            glyphs.drawString(canvas, this.statement, this.x, y + 20 );
     }
 
 
@@ -219,13 +221,20 @@ public class Statement {
 
     private void clearRight(){
         // Increment total count
+        synchronized (score) {
+            if(touched) {
+                if (chosenAns == correctAns) {
+                    //Increment score points
+                    Log.d(TAG, "RIGHT!!!");
+                    destroyStatement();
+                    score.right();
+                } else {
+                    Log.d(TAG, "WRONG! ChosenAns:" + chosenAns);
+                    score.wrong();
+                }
 
-        if(chosenAns == correctAns) {
-            //Increment score points
-            Log.d(TAG, "RIGHT!!!");
-            destroyStatement();
-        }else
-            Log.d(TAG, "WRONG! ChosenAns:" + chosenAns);
+            }
+        }
     }
 
     private void destroyStatement(){

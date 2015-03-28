@@ -33,9 +33,9 @@ public class MainGamePanel extends SurfaceView implements
      * can get wrong before level ends
      */
 
-    private LinkedList <Statement> statementList = new LinkedList<Statement>();
+    private final LinkedList <Statement> statementList = new LinkedList<Statement>();
     private Glyphs glyphs;
-    public Score score;
+    public final Score score;
 
     public MainGamePanel(Context context){
         super (context);
@@ -43,20 +43,19 @@ public class MainGamePanel extends SurfaceView implements
         getHolder().addCallback(this);
         this.glyphs = new Glyphs(BitmapFactory.decodeResource(getResources(), R.drawable.glyphs));
 
+        // Initialize empty score board
+        score = new Score(glyphs);
 
         for (int i = statementList.size(); i < MAX_STATEMENTS; i++) {
 
             Statement statement;
-            statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, glyphs);
+            statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, glyphs, score);
 
             // Add to the list of statements
             synchronized (statementList) {
                 statementList.add(statement);
             }
         }
-
-        // Initialize empty score board
-        score = new Score();
 
         // create game loop thread
         thread = new MainThread(getHolder(), this);
@@ -66,7 +65,7 @@ public class MainGamePanel extends SurfaceView implements
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
+        Log.d(TAG, "MainGamePanel Surface Changed");
     }
 
 
@@ -98,19 +97,23 @@ public class MainGamePanel extends SurfaceView implements
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        Log.d(TAG, "MainGamePanel surface destroyed");
+
         boolean retry = true;
         while (retry) {
             try {
-
-                thread.join();
+                Log.d(TAG, "Trying to Join thread");
+               thread.join();
+                Log.d(TAG, "thread.SetRunning(false)");
                 thread.setRunning(false);
                 retry = false;
-
             } catch (InterruptedException e) {
                 // try again shutting down the thread
-
+                Log.d(TAG, "Caught Exception");
+                thread.setRunning(false);
             }
         }
+
     }
 
 
@@ -133,7 +136,7 @@ public class MainGamePanel extends SurfaceView implements
                         s.handleActionDown((int) event.getX(), (int) event.getY());
 
                         // check if in the lower part of the screen we exit
-                        if (event.getY() > getHeight() - 10) {
+                        if (event.getY() > getHeight() - 70) {
                             thread.setRunning(false);
                             ((Activity) getContext()).finish();
                         }
@@ -152,8 +155,14 @@ public class MainGamePanel extends SurfaceView implements
     @Override
     protected void onDraw(Canvas canvas) {
         // fills the canvas with black
-        canvas.drawColor(Color.LTGRAY);
+        canvas.drawColor(Color.BLACK);
         ListIterator<Statement> list;
+
+        // Draw the score
+        synchronized (score){
+            score.draw(canvas);
+        }
+
 
         //Iterate through statementList and draw
         synchronized (statementList) {
@@ -175,10 +184,10 @@ public class MainGamePanel extends SurfaceView implements
             for (int i = statementList.size(); i < MAX_STATEMENTS; i++) {
 
                 Statement statement;
-                statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, glyphs);
+                statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, glyphs, score);
 
                 statement.setX(getWidth() / 2);
-                statement.setY(getHeight() + (i * statement.getBitmap().getHeight()) + OFFSET * i);
+                statement.setY(getHeight() + (i * statement.getBitmap().getHeight()) + OFFSET * ++count);
 
                 // Add to the list of statements
 
