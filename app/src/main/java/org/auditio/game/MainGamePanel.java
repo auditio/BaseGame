@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.content.Context;
 import android.graphics.Color;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -20,7 +21,7 @@ import java.util.ListIterator;
 public class MainGamePanel extends SurfaceView implements
         SurfaceHolder.Callback{
 
-    public final int MAX_STATEMENTS = 8;
+    public int MAX_STATEMENTS = 8;
     public final int OFFSET = 25;
     public final int SCOREPANEL = 280;
 
@@ -44,7 +45,7 @@ public class MainGamePanel extends SurfaceView implements
         this.glyphs = new Glyphs(BitmapFactory.decodeResource(getResources(), R.drawable.glyphs));
 
         // Initialize empty score board
-        score = new Score(glyphs);
+        score = new Score(glyphs, BitmapFactory.decodeResource(getResources(), R.drawable.score_panel));
 
         for (int i = statementList.size(); i < MAX_STATEMENTS; i++) {
 
@@ -68,23 +69,53 @@ public class MainGamePanel extends SurfaceView implements
         Log.d(TAG, "MainGamePanel Surface Changed");
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        Log.d(TAG, "DETECTED KEY BACK");
+
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0){
+            boolean retry = true;
+            while (retry) {
+                try {
+                    //Log.d(TAG, "Trying to Join thread");
+                    thread.join();
+                    //Log.d(TAG, "thread.SetRunning(false)");
+                    thread.setRunning(false);
+                    retry = false;
+                } catch (InterruptedException e) {
+                    // try again shutting down the thread
+                    Log.d(TAG, "Caught Exception");
+                    thread.setRunning(false);
+                }
+            }
+
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         // Keep adding new statements if there is room
         ListIterator<Statement> list = statementList.listIterator();
 
+
         int count = 0;
 
         while (list.hasNext()){
             Statement s = list.next();
 
-
             s.setX(getWidth() / 2);
             s.setY(getHeight() + (++count * s.getBitmap().getHeight()) + OFFSET * count);
 
             if (count == 1){
+                // Set max number of statements based on the device size
+                //MAX_STATEMENTS = getWidth() / s.getBitmap().getHeight();
                 Log.d(TAG, "Statement height: " + s.getBitmap().getHeight() + " Width: " + s.getBitmap().getWidth() );
+                Log.d(TAG, "***** " + MAX_STATEMENTS + " *****");
+
+                score.setX(getWidth()/2);
             }
         }
 
@@ -123,9 +154,12 @@ public class MainGamePanel extends SurfaceView implements
 
         ListIterator<Statement> list;
 
+        if (event.getAction() == MotionEvent.BUTTON_BACK){
+            Log.d(TAG, "******* PRESSED BUTTON BACK ******");
+
+        }
         synchronized (statementList) {
             list = statementList.listIterator();
-
 
             while (list.hasNext()) {
                 Statement s = list.next();
@@ -155,7 +189,7 @@ public class MainGamePanel extends SurfaceView implements
     @Override
     protected void onDraw(Canvas canvas) {
         // fills the canvas with black
-        canvas.drawColor(Color.BLACK);
+        canvas.drawColor(Color.parseColor("#bdada0"));
         ListIterator<Statement> list;
 
         // Draw the score
@@ -187,10 +221,9 @@ public class MainGamePanel extends SurfaceView implements
                 statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, glyphs, score);
 
                 statement.setX(getWidth() / 2);
-                statement.setY(getHeight() + (i * statement.getBitmap().getHeight()) + OFFSET * ++count);
+                statement.setY(getHeight() + ((i - 1) * statement.getBitmap().getHeight()) + OFFSET * ++count);
 
                 // Add to the list of statements
-
                 statementList.add(statement);
             }
 
