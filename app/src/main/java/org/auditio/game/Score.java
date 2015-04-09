@@ -3,13 +3,13 @@ package org.auditio.game;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.util.Log;
+//import android.util.Log;
 
 /**
  * Created by auditio on 15-03-05.
  */
 public class Score {
-    private static final String TAG = MainThread.class.getSimpleName();
+    //private static final String TAG = Score.class.getSimpleName();
 
     private int totalAnswered;
     private int totalCorrect;

@@ -5,12 +5,12 @@ package org.auditio.game;
  */
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.util.Log;
+//import android.util.Log;
 
 import java.util.Random;
 
 public class Statement {
-    private static final String TAG = MainThread.class.getSimpleName();
+    //private static final String TAG = Statement.class.getSimpleName();
 
     private Bitmap bitmap;
     // Store if the statement generated is wright or wrong
@@ -45,8 +45,8 @@ public class Statement {
 
         decideRightWrong();
         this.statement = generateStatement();
-        Log.d(TAG, "EQUATION: " + this.statement);
-        Log.d(TAG, bitmap.getWidth() + " " + bitmap.getHeight());
+        //Log.d(TAG, "EQUATION: " + this.statement);
+        //Log.d(TAG, bitmap.getWidth() + " " + bitmap.getHeight());
 
         // Load the glyph resources
         this.glyphs = glyphs;
@@ -87,12 +87,6 @@ public class Statement {
     public boolean isTouched() {
         return touched;
     }
-
-    private void createStatementBlob(){
-        // Put the statement in a bitmap configuration
-    }
-
-
 
     /**
       * Generate the equation to be displayed.
@@ -148,7 +142,7 @@ public class Statement {
 
     public void setTouched(boolean touched) {
         this.touched = touched;
-        Log.d(TAG, "Touched statement x#" + x + " y#" + y);
+        //Log.d(TAG, "Touched statement x#" + x + " y#" + y);
     }
 
     public void draw(Canvas canvas) {
@@ -179,7 +173,7 @@ public class Statement {
                 chosenAns = 0;
                 setTouched (true);
 
-                Log.d(TAG, "* PICKED TICK *");
+                //Log.d(TAG, "* PICKED TICK *");
             }else
                 setTouched (false);
 
@@ -189,14 +183,14 @@ public class Statement {
                 chosenAns = 1;
                 setTouched (true);
 
-                Log.d(TAG, " * PICKED CROSS *");
+                //Log.d(TAG, " * PICKED CROSS *");
             } else
                 setTouched (false);
 
         } else
             setTouched(false);
 
-
+        /*
         int rightXlower = x - bitmap.getWidth()/2;
         int rightXupper = x - bitmap.getWidth()/2 + bitmap.getHeight();
         int yLower = y - bitmap.getHeight()/2;
@@ -209,6 +203,7 @@ public class Statement {
         Log.d(TAG, "Right X: " + rightXlower + " X:" + rightXupper + " Wrong X: " + wrongXlower + " X:" + wrongXupper);
         Log.d(TAG, "Y lower:" + wrongXlower + " upper:" + wrongXupper);
         Log.d(TAG, "---------------------------------------------------");
+        */
 
         // At this point we are ready to compare if the user chose the right/wrong answer
         clearRight();
@@ -221,19 +216,17 @@ public class Statement {
 
     private void clearRight(){
         // Increment total count
-        synchronized (score) {
-            if(touched) {
-                if (chosenAns == correctAns) {
-                    //Increment score points
-                    Log.d(TAG, "RIGHT!!!");
-                    destroyStatement();
-                    score.right();
-                } else {
-                    Log.d(TAG, "WRONG! ChosenAns:" + chosenAns);
-                    score.wrong();
-                }
-
+        if(touched) {
+            if (chosenAns == correctAns) {
+                //Increment score points
+                //Log.d(TAG, "RIGHT!!!");
+                destroyStatement();
+                score.right();
+            } else {
+                //Log.d(TAG, "WRONG! ChosenAns:" + chosenAns);
+                score.wrong();
             }
+
         }
     }
 

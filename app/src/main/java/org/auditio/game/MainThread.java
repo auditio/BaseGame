@@ -4,8 +4,6 @@ import android.graphics.Canvas;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-import java.util.Random;
-
 
 /**
  * Created by auditio on 15-02-25.
@@ -18,12 +16,12 @@ public class MainThread extends Thread {
     // flags to hold game state
     private boolean                 running;
     private SurfaceHolder           surfaceHolder;
-    private MainGamePanel           gamePanel;
+    private GamePanel           gamePanel;
 
     private static final String     TAG = MainThread.class.getSimpleName();
 
 
-    public MainThread(SurfaceHolder surfaceHolder, MainGamePanel gamePanel) {
+    public MainThread(SurfaceHolder surfaceHolder, GamePanel gamePanel) {
         super();
         this.surfaceHolder = surfaceHolder;
         this.gamePanel = gamePanel;
@@ -44,7 +42,7 @@ public class MainThread extends Thread {
 
 
         long tickCount = 0L;
-        Log.d(TAG, "Starting Game Loop");
+        Log.d(TAG, "****** Starting Game Loop *****");
 
         while (running) {
             canvas = null;
@@ -53,34 +51,32 @@ public class MainThread extends Thread {
             try {
                 canvas = this.surfaceHolder.lockCanvas();
 
-                synchronized (surfaceHolder) {
-                    beginTime = System.currentTimeMillis();
-                    frameSkipped = 0;
+                beginTime = System.currentTimeMillis();
+                frameSkipped = 0;
 
-                    // update game state and render canvas on the panel
+                // update game state and render canvas on the panel
+                this.gamePanel.update();
+                this.gamePanel.onDraw(canvas);
+
+                timeDiff = System.currentTimeMillis() - beginTime;
+                sleepTime = (int) (FRAME_PERIOD - timeDiff);
+
+                // If tasks completed prior to period end, put thread to sleep
+                if(sleepTime > 0){
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+
+                    }
+                }
+
+                // If tasks need longer to complete, need to skip frames
+                while (sleepTime < 0 && frameSkipped < MAX_FRAME_SKIPS){
+                    // Update state without rendering
                     this.gamePanel.update();
-                    this.gamePanel.onDraw(canvas);
 
-                    timeDiff = System.currentTimeMillis() - beginTime;
-                    sleepTime = (int) (FRAME_PERIOD - timeDiff);
-
-                    // If tasks completed prior to period end, put thread to sleep
-                    if(sleepTime > 0){
-                        try {
-                            Thread.sleep(sleepTime);
-                        } catch (InterruptedException e) {
-
-                        }
-                    }
-
-                    // If tasks need longer to complete, need to skip frames
-                    while (sleepTime < 0 && frameSkipped < MAX_FRAME_SKIPS){
-                        // Update state without rendering
-                        this.gamePanel.update();
-
-                        sleepTime += FRAME_PERIOD;
-                        frameSkipped++;
-                    }
+                    sleepTime += FRAME_PERIOD;
+                    frameSkipped++;
                 }
             } finally {
                 // Unlock canvas unless its blank

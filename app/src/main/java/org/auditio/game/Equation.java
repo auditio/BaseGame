@@ -9,7 +9,7 @@ import java.util.Random;
  */
 public class Equation {
     Number [] equation;
-    private static final String TAG = Equation.class.getSimpleName();
+    //private static final String TAG = Equation.class.getSimpleName();
 
     public Equation (Number[] nums){
         this.equation = new Number[nums.length * 2 - 1];
@@ -54,7 +54,7 @@ public class Equation {
 
         }
 
-        Log.d(TAG, eq + " = " + solution());
+        //Log.d(TAG, eq + " = " + solution());
         return eq;
     }
 

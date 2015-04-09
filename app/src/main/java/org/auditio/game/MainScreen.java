@@ -4,11 +4,13 @@ import org.auditio.game.util.SystemUiHider;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -22,7 +24,7 @@ import android.view.WindowManager;
  */
 public class MainScreen extends Activity {
 
-    private static final String TAG = MainThread.class.getSimpleName();
+    private static final String TAG = MainScreen.class.getSimpleName();
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -175,7 +177,10 @@ public class MainScreen extends Activity {
 
     /** Called when the user clicks the Send button */
     public void startGame(View view) {
-        setContentView(new MainGamePanel(this));
+        //setContentView(R.layout.surface);
+        Intent intent = new Intent(this, GamePanel.class);
+        //SurfaceView surface = (SurfaceView) findViewById(R.id.surfaceView);
+        startActivity(intent);
     }
 
     @Override
