@@ -5,6 +5,9 @@ package org.auditio.game;
  */
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 //import android.util.Log;
 
 import java.util.Random;
@@ -36,6 +39,21 @@ public class Statement {
 
     private Glyphs glyphs;
     private Score score;
+
+
+    public Statement(Bitmap bitmap, int x, int y, Score score) {
+        this.bitmap = bitmap;
+        this.x = x;
+        this.y = y;
+        this.speed = new Speed(5, 5);
+
+        decideRightWrong();
+        this.statement = generateStatement();
+        //Log.d(TAG, "EQUATION: " + this.statement);
+        //Log.d(TAG, bitmap.getWidth() + " " + bitmap.getHeight());
+        this.score = score;
+        this.glyphs = null;
+    }
 
     public Statement(Bitmap bitmap, int x, int y, Glyphs glyphs, Score score) {
         this.bitmap = bitmap;
@@ -149,10 +167,29 @@ public class Statement {
         int x = this.x - (this.bitmap.getWidth() / 2);
         int y = this.y - (this.bitmap.getHeight() / 2);
 
+        int width = canvas.getWidth()/3;
+
         canvas.drawBitmap(bitmap, x, y, null);
         //Log.d(TAG, "** STATEMENT: " + statement);
-        if (!touched)
-            glyphs.drawString(canvas, this.statement, this.x, y + 20 );
+        if (!touched) {
+            if(glyphs != null)
+                glyphs.drawString(canvas, this.statement, this.x, y + 20);
+            else{
+                Typeface tf = Typeface.create(Typeface.MONOSPACE,Typeface.BOLD_ITALIC);
+
+                int size = width/7;
+                Paint paint = new Paint();
+                paint.setTypeface(tf);
+                paint.setColor(Color.GRAY);
+
+                do {
+                    paint.setTextSize(++size);
+                } while(paint.measureText(this.statement) < width);
+
+                canvas.drawText(this.statement, width, this.y + this.bitmap.getHeight()/3, paint);
+
+            }
+        }
     }
 
 

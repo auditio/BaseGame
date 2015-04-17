@@ -18,6 +18,13 @@ public class Score {
     private int x;
     private int y;
 
+    public Score(){
+        this.totalAnswered = 0;
+        this.totalCorrect = 0;
+        this.x = 0;
+        this.y = 45;
+    }
+
     public Score(Glyphs glyphs, Bitmap bitmap){
         this.totalAnswered = 0;
         this.totalCorrect = 0;

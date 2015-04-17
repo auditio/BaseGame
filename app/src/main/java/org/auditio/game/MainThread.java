@@ -18,7 +18,7 @@ public class MainThread extends Thread {
     private SurfaceHolder           surfaceHolder;
     private GamePanel           gamePanel;
 
-    private static final String     TAG = MainThread.class.getSimpleName();
+    //private static final String     TAG = MainThread.class.getSimpleName();
 
 
     public MainThread(SurfaceHolder surfaceHolder, GamePanel gamePanel) {
@@ -42,7 +42,7 @@ public class MainThread extends Thread {
 
 
         long tickCount = 0L;
-        Log.d(TAG, "****** Starting Game Loop *****");
+        //Log.d(TAG, "****** Starting Game Loop *****");
 
         while (running) {
             canvas = null;
@@ -88,6 +88,6 @@ public class MainThread extends Thread {
             tickCount++;
         }
 
-        Log.d(TAG, "Game Loop Executed " + tickCount + " times");
+        //Log.d(TAG, "Game Loop Executed " + tickCount + " times");
     }
 }

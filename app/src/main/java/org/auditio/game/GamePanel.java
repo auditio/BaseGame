@@ -3,9 +3,12 @@ package org.auditio.game;
 import org.auditio.game.util.SystemUiHider;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -29,13 +32,16 @@ import java.util.ListIterator;
 public class GamePanel extends Activity implements
         SurfaceHolder.Callback{
 
-    public int MAX_STATEMENTS = 8;
     public final int OFFSET = 25;
-    public final int SCOREPANEL = 280;
+    public int MAX_STATEMENTS = 5;
+    public int scorePanel;
 
-    SurfaceView surface;
-    SurfaceHolder holder;
+
+    private SurfaceView surface;
+    private SurfaceHolder holder;
     private MainThread thread;
+    private Bitmap background;
+    private int gameOver_height;
     //private static final String TAG = MainThread.class.getSimpleName();
 
     /*
@@ -43,16 +49,13 @@ public class GamePanel extends Activity implements
      * this will be the maximum number of statements that one
      * can get wrong before level ends
      */
-
     private final LinkedList<Statement> statementList = new LinkedList<Statement>();
-
-    private Glyphs glyphs;
 
     // Initialize empty score board
     public Score score;
 
 
-    private static final String TAG = GamePanel.class.getSimpleName();
+    //private static final String TAG = GamePanel.class.getSimpleName();
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -68,6 +71,7 @@ public class GamePanel extends Activity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -79,12 +83,8 @@ public class GamePanel extends Activity implements
         surface = (SurfaceView) findViewById(R.id.surfaceView);
         surface.getHolder().addCallback(this);
 
-        Log.d(TAG, "GamePanel: View Added");
-
-        glyphs = new Glyphs(BitmapFactory.decodeResource(getResources(), R.drawable.glyphs));
-        score = new Score(glyphs, BitmapFactory.decodeResource(getResources(), R.drawable.score_panel));
-
-        startGame();
+        //Log.d(TAG, "GamePanel: View Added");
+        score = new Score();
     }
 
     @Override
@@ -131,13 +131,16 @@ public class GamePanel extends Activity implements
 
     /** Called when the user clicks the Send button */
     public void startGame() {
-        Log.d(TAG, "***** STARTING GAME *****");
+        //Log.d(TAG, "***** STARTING GAME *****");
         holder  = surface.getHolder();
+
+        background = BitmapFactory.decodeResource(getResources(), R.drawable.game_screen);
 
         for (int i = statementList.size(); i < MAX_STATEMENTS; i++) {
 
             Statement statement;
-            statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, glyphs, score);
+            statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, score);
+
 
             // Add to the list of statements
             synchronized (statementList) {
@@ -153,11 +156,20 @@ public class GamePanel extends Activity implements
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        Log.d(TAG, "GamePanel: Surface Created");
+        //Log.d(TAG, "GamePanel: Surface Created");
+        startGame();
+
         // Keep adding new statements if there is room
         ListIterator<Statement> list = statementList.listIterator();
 
         int count = 0;
+        gameOver_height = surface.getHeight();
+        scorePanel = surface.getHeight()/4;
+
+        MAX_STATEMENTS = (surface.getHeight() - scorePanel) /
+                (BitmapFactory.decodeResource(getResources(), R.drawable.statement).getHeight() + OFFSET);
+
+        //Log.d(TAG, " ***** MAX: " + MAX_STATEMENTS);
 
         while (list.hasNext()) {
             Statement s = list.next();
@@ -175,22 +187,57 @@ public class GamePanel extends Activity implements
             }
         }
 
+
         thread.setRunning(true);
-        thread.start();
+
+        if (!thread.isAlive())
+            thread.start();
+
     }
 
 
 
     public void onDraw(Canvas canvas) {
         // fills the canvas with background color
-        canvas.drawColor(Color.parseColor("#bdada0"));
+        canvas.drawBitmap(background, 0, 0, null);
         ListIterator<Statement> list;
 
         // Draw the score
-        synchronized (score){
-            score.draw(canvas);
-        }
+        //score.draw(canvas);
+        int maxWidth = surface.getWidth()/2;
+        String s = "SCORE: " +  score.getTotalCorrect() + "/" + score.getTotalAnswered();
 
+        Typeface tf = Typeface.create(Typeface.MONOSPACE,Typeface.BOLD_ITALIC);
+
+        int size = 0;
+        Paint paint = new Paint();
+        paint.setTypeface(tf);
+        paint.setColor(Color.WHITE);
+
+        do {
+            paint.setTextSize(++size);
+        } while(paint.measureText(s) < maxWidth);
+
+        canvas.drawText(s, surface.getWidth()/2 - 100, scorePanel/2, paint);
+
+
+        if (score.getTotalAnswered() - score.getTotalCorrect() == MAX_STATEMENTS){
+            paint.setColor(Color.DKGRAY);
+
+            size = 0;
+
+            do {
+                paint.setTextSize(++size);
+            } while(paint.measureText("GAME OVER") < maxWidth);
+
+            canvas.drawText("GAME OVER", maxWidth/2, gameOver_height, paint);
+
+            if (gameOver_height > surface.getHeight()/2) {
+                gameOver_height -= 5;
+            }
+
+            //Log.d(TAG, "Game Over: " + gameOver_height);
+        }
 
         //Iterate through statementList and draw
         synchronized (statementList) {
@@ -208,29 +255,17 @@ public class GamePanel extends Activity implements
         int count = 0;
 
         synchronized (statementList) {
-            // If statements has been removed, regenerate
-            for (int i = statementList.size(); i < MAX_STATEMENTS; i++) {
-
-                Statement statement;
-                statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, glyphs, score);
-
-                statement.setX(surface.getWidth() / 2);
-                statement.setY(surface.getHeight() + ((i - 1) * statement.getBitmap().getHeight()) + OFFSET * ++count);
-
-                // Add to the list of statements
-                statementList.add(statement);
-            }
-
+            // This variable will track the height of the last statement that is in the
+            // iterator. At that point the additional statements will get added
+            int lastY = 0;
 
             list = statementList.listIterator();
-
-
 
             while (list.hasNext()) {
                 // check collision with top wall if heading up
                 Statement s = list.next();
 
-                int stopAt = SCOREPANEL + (++count * s.getBitmap().getHeight() + OFFSET * count);
+                int stopAt = scorePanel + (count * s.getBitmap().getHeight() + OFFSET * count++);
 
                 if (s.destroy()) {
                     // pop statement from the linkedlist
@@ -248,15 +283,30 @@ public class GamePanel extends Activity implements
                     s.getSpeed().setYv(5);
                 }
 
+                lastY = s.getY();
                 // Update the moving statements
                 s.update();
+            }
+
+
+            // If statements has been removed, regenerate
+            for (int i = statementList.size(), c = 1; i < MAX_STATEMENTS; i++, c++) {
+
+                Statement statement;
+                statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, score);
+
+                statement.setX(surface.getWidth() / 2);
+                statement.setY(lastY + statement.getBitmap().getHeight() * c + c* OFFSET);
+
+                // Add to the list of statements
+                statementList.add(statement);
             }
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.d(TAG, "Coords: x=" + event.getX() + ", y=" + event.getY());
+        //Log.d(TAG, "Coords: x=" + event.getX() + ", y=" + event.getY());
 
         ListIterator<Statement> list;
 
@@ -282,12 +332,12 @@ public class GamePanel extends Activity implements
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.d(TAG, "GamePanel surface destroyed");
+        //Log.d(TAG, "GamePanel surface destroyed");
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        Log.d(TAG, "GamePanel Surface Changed");
+        //Log.d(TAG, "GamePanel Surface Changed");
     }
 
 
@@ -296,27 +346,31 @@ public class GamePanel extends Activity implements
         boolean retry = true;
         while (retry) {
             try {
-                Log.d(TAG, "thread.SetRunning(false)");
+                //Log.d(TAG, "thread.SetRunning(false)");
                 thread.setRunning(false);
-                Log.d(TAG, "Trying to Join thread");
+                //Log.d(TAG, "Trying to Join thread");
                 thread.join();
                 retry = false;
             } catch (InterruptedException e) {
-                Log.d(TAG, "Caught Exception");
+                //Log.d(TAG, "Caught Exception");
             }
         }
 
         super.onPause();
+
+        onDestroy();
     }
+
+
     @Override
     protected void onDestroy() {
-        Log.d(TAG, "Destroying...");
+        //Log.d(TAG, "Destroying...");
         super.onDestroy();
     }
 
     @Override
     protected void onStop () {
-        Log.d(TAG, "Stopping...");
+        //Log.d(TAG, "Stopping...");
         super.onStop();
     }
 

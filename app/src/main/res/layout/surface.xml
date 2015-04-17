@@ -2,8 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000" tools:context=".MainScreen"
-    android:padding="5dp">
+    android:background="@drawable/main_screen" tools:context=".MainScreen"
+    android:orientation="vertical"
+    android:gravity="center_vertical|center_horizontal">
 
     <SurfaceView
         android:id="@+id/surfaceView"

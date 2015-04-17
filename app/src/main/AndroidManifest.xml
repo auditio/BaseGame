@@ -20,7 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="org.auditio.game.GamePanel" >
+        <activity android:name="org.auditio.game.GamePanel"
+            android:screenOrientation="sensorPortrait">
         </activity>
 
     </application>
