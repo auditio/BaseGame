@@ -15,61 +15,51 @@ import java.util.Random;
 public class Statement {
     //private static final String TAG = Statement.class.getSimpleName();
 
+    // The score reference object that gets updated by action on statements
+    private Score score;
+
+    // The image to render behind the statement
     private Bitmap bitmap;
-    // Store if the statement generated is wright or wrong
 
     /*
-     * 0 = correct statement
-     * 1 = wrong statement
+     * 0 = Correct equation
+     * 1 = Wrong equation
+     * 2 = Statement has not been generated yet
      */
     private int correctAns = 2;
     /*
-     * 0 = correct statement
-     * 1 = wrong statement
+     * 0 = Player picked tick
+     * 1 = Player picked cross
+     * 2 = No Answer yet
      */
     private int chosenAns = 2;
+
+    // Array of Number object to be used for equation generation
     private Number[] nums;
 
     private int x;
     private int y;
-    private boolean touched = false;
+
     private Speed speed;
     public String statement;
+    private boolean touched = false;
     private boolean destroy = false;
 
-    private Glyphs glyphs;
-    private Score score;
-
-
+    /*
+     *
+     */
     public Statement(Bitmap bitmap, int x, int y, Score score) {
         this.bitmap = bitmap;
         this.x = x;
         this.y = y;
-        this.speed = new Speed(5, 5);
+        this.speed = new Speed(0, 2);
 
         decideRightWrong();
         this.statement = generateStatement();
+
         //Log.d(TAG, "EQUATION: " + this.statement);
         //Log.d(TAG, bitmap.getWidth() + " " + bitmap.getHeight());
         this.score = score;
-        this.glyphs = null;
-    }
-
-    public Statement(Bitmap bitmap, int x, int y, Glyphs glyphs, Score score) {
-        this.bitmap = bitmap;
-        this.x = x;
-        this.y = y;
-        this.speed = new Speed(5, 5);
-
-        decideRightWrong();
-        this.statement = generateStatement();
-        //Log.d(TAG, "EQUATION: " + this.statement);
-        //Log.d(TAG, bitmap.getWidth() + " " + bitmap.getHeight());
-
-        // Load the glyph resources
-        this.glyphs = glyphs;
-        this.score = score;
-
     }
 
     public Bitmap getBitmap() {
@@ -92,8 +82,14 @@ public class Statement {
         this.y = y;
     }
 
+    /*
+     * If destroy is set to true, it will be removed from the game screen
+     */
     public boolean destroy () { return destroy; }
 
+    /*
+     * Updates the speed and diretion of the statement object to make it stop moving
+     */
     public void stopMoving(){
         this.speed.setYv(0);
     }
@@ -107,9 +103,11 @@ public class Statement {
     }
 
     /**
-      * Generate the equation to be displayed.
+     * Generate the equation to be displayed.
      *  Set CorrectAns = 0 means equation is true
      *      CorrectAns = 1 means equation is false
+     *
+     *   @return Returns a string containing a mathematical statement
      */
     private String generateStatement(){
         this.nums = new Number [2];
@@ -141,8 +139,12 @@ public class Statement {
     }
 
     /*
-     * 0 = correct statement
-     * 1 = wrong statement
+     * Randomly generate 0 or 1 to determine whether or not the equation
+     * prepared should be correct or incorrect and store the result
+     * in member 'correctAns'
+     *
+     * 0 = correct equation
+     * 1 = incorrect equation
      */
     private void decideRightWrong(){
         Random rand = new Random();
@@ -163,42 +165,24 @@ public class Statement {
         //Log.d(TAG, "Touched statement x#" + x + " y#" + y);
     }
 
-    public void draw(Canvas canvas) {
-        int x = this.x - (this.bitmap.getWidth() / 2);
-        int y = this.y - (this.bitmap.getHeight() / 2);
-
-        int width = canvas.getWidth()/3;
-
-        canvas.drawBitmap(bitmap, x, y, null);
-        //Log.d(TAG, "** STATEMENT: " + statement);
-        if (!touched) {
-            if(glyphs != null)
-                glyphs.drawString(canvas, this.statement, this.x, y + 20);
-            else{
-                Typeface tf = Typeface.create(Typeface.MONOSPACE,Typeface.BOLD_ITALIC);
-
-                int size = width/7;
-                Paint paint = new Paint();
-                paint.setTypeface(tf);
-                paint.setColor(Color.GRAY);
-
-                do {
-                    paint.setTextSize(++size);
-                } while(paint.measureText(this.statement) < width);
-
-                canvas.drawText(this.statement, width, this.y + this.bitmap.getHeight()/3, paint);
-
-            }
-        }
+    /*
+     * Update the statement's speed and direction of movement
+     */
+    public void update() {
+        y += (speed.getYv() * speed.getyDirection());
     }
 
 
     /* Calculate square areas at the end of the statement blob which will contain tick or cross mark
      *
-     * Tick coordinate: x = bitmap.x + bitmap.y, y = bitmap.y
+     *      Tick coordinate: x = bitmap.x + bitmap.y, y = bitmap.y
      *
-     * Cross coordinate: x = bitmap.witdh - bitmap.y, y = bitmap.y
+     *      Cross coordinate: x = bitmap.witdh - bitmap.y, y = bitmap.y
      *
+     * If the event params passed in falls within the button area, action accordingly
+     *
+     * @param eventX Contains the x coordinate of the touched area
+     * @param eventY Contains the y coordinate of the touched area
      *
      * */
     public void handleActionDown(int eventX, int eventY) {
@@ -210,7 +194,7 @@ public class Statement {
                 chosenAns = 0;
                 setTouched (true);
 
-                //Log.d(TAG, "* PICKED TICK *");
+                //Log.d(TAG, "* PICKED TICK * " + this.statement);
             }else
                 setTouched (false);
 
@@ -220,7 +204,7 @@ public class Statement {
                 chosenAns = 1;
                 setTouched (true);
 
-                //Log.d(TAG, " * PICKED CROSS *");
+                //Log.d(TAG, " * PICKED CROSS * " + this.statement);
             } else
                 setTouched (false);
 
@@ -247,29 +231,64 @@ public class Statement {
 
     }
 
-    public void update() {
-        y += (speed.getYv() * speed.getyDirection());
+    /*
+     * Mark the statement for deletion
+     */
+    private void destroyStatement(){
+        // Make the statement disappear
+        destroy = true;
     }
 
+    /*
+     * Determine and update player's score and mark statements for destruction if the
+     * chosen answer is correct
+     */
     private void clearRight(){
         // Increment total count
         if(touched) {
             if (chosenAns == correctAns) {
                 //Increment score points
-                //Log.d(TAG, "RIGHT!!!");
+                //Log.d(TAG, "RIGHT!!! chosen:" + chosenAns + " correct:" + correctAns);
                 destroyStatement();
                 score.right();
             } else {
-                //Log.d(TAG, "WRONG! ChosenAns:" + chosenAns);
+                //Log.d(TAG, "WRONG! chosen:" + chosenAns + " correct:" + correctAns);
                 score.wrong();
             }
 
         }
     }
 
-    private void destroyStatement(){
-        // Make the statement disappear
-        destroy = true;
+
+    /**
+     * Method draws the bitmap container of the statement and the
+     * appropriately sized string equation in it at the given coordinates
+     *
+     * @param canvas Takes in the canvas to draw on
+     */
+    public void draw(Canvas canvas) {
+        int x = this.x - (this.bitmap.getWidth() / 2);
+        int y = this.y - (this.bitmap.getHeight() / 2);
+
+        int width = canvas.getWidth()/3;
+
+        canvas.drawBitmap(bitmap, x, y, null);
+        //Log.d(TAG, "** STATEMENT: " + statement);
+        if (!touched) {
+            Typeface tf = Typeface.create(Typeface.MONOSPACE,Typeface.BOLD_ITALIC);
+
+            int size = width/7;
+            Paint paint = new Paint();
+            paint.setTypeface(tf);
+            paint.setColor(Color.GRAY);
+
+            do {
+                paint.setTextSize(++size);
+            } while(paint.measureText(this.statement) < width);
+
+            canvas.drawText(this.statement, width, this.y + this.bitmap.getHeight()/3, paint);
+
+        }
     }
 
 }

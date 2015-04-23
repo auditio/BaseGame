@@ -1306,9 +1306,16 @@ containing a value of this type.
         public static final int abc_textfield_search_activated_mtrl_alpha=0x7f020030;
         public static final int abc_textfield_search_default_mtrl_alpha=0x7f020031;
         public static final int abc_textfield_search_material=0x7f020032;
-        public static final int glyphs=0x7f020033;
-        public static final int ic_launcher=0x7f020034;
-        public static final int statement=0x7f020035;
+        public static final int button_default=0x7f020033;
+        public static final int button_focused=0x7f020034;
+        public static final int button_pressed=0x7f020035;
+        public static final int custom_button=0x7f020036;
+        public static final int game_screen=0x7f020037;
+        public static final int glyphs=0x7f020038;
+        public static final int ic_launcher=0x7f020039;
+        public static final int main_screen=0x7f02003a;
+        public static final int score_panel=0x7f02003b;
+        public static final int statement=0x7f02003c;
     }
     public static final class id {
         public static final int action_bar=0x7f080031;
@@ -1363,7 +1370,6 @@ containing a value of this type.
         public static final int search_plate=0x7f080039;
         public static final int search_src_text=0x7f08003a;
         public static final int search_voice_btn=0x7f08003e;
-        public static final int share_button=0x7f080041;
         public static final int shortcut=0x7f08002a;
         public static final int showCustom=0x7f08000f;
         public static final int showHome=0x7f080010;
@@ -1371,6 +1377,7 @@ containing a value of this type.
         public static final int split_action_bar=0x7f080007;
         public static final int start_button=0x7f080040;
         public static final int submit_area=0x7f08003c;
+        public static final int surfaceView=0x7f080041;
         public static final int tabMode=0x7f08000b;
         public static final int title=0x7f080027;
         public static final int up=0x7f080008;
@@ -1407,6 +1414,7 @@ containing a value of this type.
         public static final int abc_simple_dropdown_hint=0x7f030016;
         public static final int activity_main_screen=0x7f030017;
         public static final int support_simple_spinner_dropdown_item=0x7f030018;
+        public static final int surface=0x7f030019;
     }
     public static final class string {
         public static final int abc_action_bar_home_description=0x7f0a0000;

@@ -1,5 +1,5 @@
-/Users/auditio/AndroidStudioProjects/Game/app/build/intermediates/classes/debug
-/Users/auditio/AndroidStudioProjects/Game/app/build/intermediates/pre-dexed/debug/support-annotations-21.0.3-10e2427b03f98bd131acfcb3363886edeb2088ea.jar
-/Users/auditio/AndroidStudioProjects/Game/app/build/intermediates/pre-dexed/debug/internal_impl-21.0.3-d06c90e85e594e20f430d0287bdadcf13cc32e2b.jar
-/Users/auditio/AndroidStudioProjects/Game/app/build/intermediates/pre-dexed/debug/classes-91935cd559812d0cf1a64bd38d84aa5b667b4869.jar
-/Users/auditio/AndroidStudioProjects/Game/app/build/intermediates/pre-dexed/debug/classes-bec32623a4dd99b0d6fa31182c16c80e6eaad1ea.jar
+/Users/auditio/AndroidStudioProjects/MathAttack/app/build/intermediates/classes/debug
+/Users/auditio/AndroidStudioProjects/MathAttack/app/build/intermediates/pre-dexed/debug/support-annotations-21.0.3-10e2427b03f98bd131acfcb3363886edeb2088ea.jar
+/Users/auditio/AndroidStudioProjects/MathAttack/app/build/intermediates/pre-dexed/debug/internal_impl-21.0.3-38c101860fa9a3336d9468879486c5166c87c025.jar
+/Users/auditio/AndroidStudioProjects/MathAttack/app/build/intermediates/pre-dexed/debug/classes-c0698a120740c58c30a5311f49da62c519263180.jar
+/Users/auditio/AndroidStudioProjects/MathAttack/app/build/intermediates/pre-dexed/debug/classes-e394b3a1045c7b25e3a8cb74d70217035da9c8d3.jar

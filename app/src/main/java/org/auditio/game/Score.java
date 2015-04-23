@@ -7,29 +7,21 @@ import android.graphics.Canvas;
 
 /**
  * Created by auditio on 15-03-05.
+ *
+ * This class contains details about the player's scores
  */
 public class Score {
     //private static final String TAG = Score.class.getSimpleName();
 
     private int totalAnswered;
     private int totalCorrect;
-    private Glyphs glyphs;
-    private Bitmap bitmap;
+
     private int x;
     private int y;
 
     public Score(){
         this.totalAnswered = 0;
         this.totalCorrect = 0;
-        this.x = 0;
-        this.y = 45;
-    }
-
-    public Score(Glyphs glyphs, Bitmap bitmap){
-        this.totalAnswered = 0;
-        this.totalCorrect = 0;
-        this.glyphs = glyphs;
-        this.bitmap = bitmap;
         this.x = 0;
         this.y = 45;
     }
@@ -67,17 +59,5 @@ public class Score {
     /* only increment total count */
     public void wrong(){
         this.totalAnswered++;
-    }
-
-
-    public void draw(Canvas canvas){
-        int x = this.x - (this.bitmap.getWidth() / 2);
-
-        canvas.drawBitmap(bitmap, x , y, null);
-
-        String printScore = getTotalCorrect() + "/" + getTotalAnswered();
-
-        x = this.x - 50 + (printScore.length() * 23 * 3 / 2 );
-        glyphs.drawString(canvas, printScore, x, 100);
     }
 }

@@ -5,22 +5,22 @@ import org.auditio.game.util.SystemUiHider;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Typeface;
-import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
+import java.util.LinkedList;
+import java.util.ListIterator;
+//import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.graphics.Typeface;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-import java.util.LinkedList;
-import java.util.ListIterator;
 
 
 /**
@@ -33,7 +33,7 @@ public class GamePanel extends Activity implements
         SurfaceHolder.Callback{
 
     public final int OFFSET = 25;
-    public int MAX_STATEMENTS = 5;
+    public int maxStatements = 5;
     public int scorePanel;
 
 
@@ -42,10 +42,15 @@ public class GamePanel extends Activity implements
     private MainThread thread;
     private Bitmap background;
     private int gameOver_height;
+    private long timeDiff;
+    private int level = 1;
+    private boolean update = true;
+    private float curSpeed;
+
     //private static final String TAG = MainThread.class.getSimpleName();
 
     /*
-     * Create an array of statements of size MAX_STATEMENTS
+     * Create an array of statements of size maxStatements
      * this will be the maximum number of statements that one
      * can get wrong before level ends
      */
@@ -129,14 +134,16 @@ public class GamePanel extends Activity implements
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
 
-    /** Called when the user clicks the Send button */
+    /*
+     * Called when the user clicks the Send button
+     */
     public void startGame() {
         //Log.d(TAG, "***** STARTING GAME *****");
         holder  = surface.getHolder();
 
         background = BitmapFactory.decodeResource(getResources(), R.drawable.game_screen);
 
-        for (int i = statementList.size(); i < MAX_STATEMENTS; i++) {
+        for (int i = statementList.size(); i < maxStatements; i++) {
 
             Statement statement;
             statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, score);
@@ -166,24 +173,21 @@ public class GamePanel extends Activity implements
         gameOver_height = surface.getHeight();
         scorePanel = surface.getHeight()/4;
 
-        MAX_STATEMENTS = (surface.getHeight() - scorePanel) /
+        maxStatements = (surface.getHeight() - scorePanel) /
                 (BitmapFactory.decodeResource(getResources(), R.drawable.statement).getHeight() + OFFSET);
 
-        //Log.d(TAG, " ***** MAX: " + MAX_STATEMENTS);
+        //Log.d(TAG, " ***** MAX: " + maxStatements);
 
+        // Generate the statements to be displayed
         while (list.hasNext()) {
             Statement s = list.next();
 
             s.setX(surface.getWidth() / 2);
             s.setY(surface.getHeight() + (++count * s.getBitmap().getHeight()) + OFFSET * count);
 
-            if (count == 1) {
-                // Set max number of statements based on the device size
-                //MAX_STATEMENTS = getWidth() / s.getBitmap().getHeight();
-                //Log.d(TAG, "Statement height: " + s.getBitmap().getHeight() + " Width: " + s.getBitmap().getWidth());
-                //Log.d(TAG, "***** " + MAX_STATEMENTS + " *****");
 
-                score.setX(surface.getWidth() / 2);
+            if (count == 1) {
+                curSpeed = s.getSpeed().getYv();
             }
         }
 
@@ -195,77 +199,72 @@ public class GamePanel extends Activity implements
 
     }
 
+    /*
+     * @return Returns a string containing a timestamp containing the duration of
+     * time while player has played the game
+     *
+     */
+    private String duration(){
+        long minute,second;
 
-
-    public void onDraw(Canvas canvas) {
-        // fills the canvas with background color
-        canvas.drawBitmap(background, 0, 0, null);
-        ListIterator<Statement> list;
-
-        // Draw the score
-        //score.draw(canvas);
-        int maxWidth = surface.getWidth()/2;
-        String s = "SCORE: " +  score.getTotalCorrect() + "/" + score.getTotalAnswered();
-
-        Typeface tf = Typeface.create(Typeface.MONOSPACE,Typeface.BOLD_ITALIC);
-
-        int size = 0;
-        Paint paint = new Paint();
-        paint.setTypeface(tf);
-        paint.setColor(Color.WHITE);
-
-        do {
-            paint.setTextSize(++size);
-        } while(paint.measureText(s) < maxWidth);
-
-        canvas.drawText(s, surface.getWidth()/2 - 100, scorePanel/2, paint);
-
-
-        if (score.getTotalAnswered() - score.getTotalCorrect() == MAX_STATEMENTS){
-            paint.setColor(Color.DKGRAY);
-
-            size = 0;
-
-            do {
-                paint.setTextSize(++size);
-            } while(paint.measureText("GAME OVER") < maxWidth);
-
-            canvas.drawText("GAME OVER", maxWidth/2, gameOver_height, paint);
-
-            if (gameOver_height > surface.getHeight()/2) {
-                gameOver_height -= 5;
-            }
-
-            //Log.d(TAG, "Game Over: " + gameOver_height);
+        if (timeDiff < 60){
+            minute = 0;
+            second = timeDiff;
+        }else {
+            minute = timeDiff/60;
+            timeDiff = timeDiff - minute * 60;
+            second = timeDiff;
         }
 
-        //Iterate through statementList and draw
-        synchronized (statementList) {
-            list = statementList.listIterator();
+        return String.format("%02d", minute) + ":" + String.format("%02d", second);
+    }
 
-            while (list.hasNext()) {
-                list.next().draw(canvas);
-            }
+
+    /*
+     * Based on the level the user is at, increase the speed
+     *
+     */
+    private void speedUp() {
+        // Update speed every 30 seconds
+        if (timeDiff == 30 * level) {
+            this.curSpeed++;
+            this.level++;
+
+            //Log.d(TAG, "*** SPEEDUP! Duration: " + timeDiff + " Speed : " + this.curSpeed);
         }
     }
 
 
+    /*
+     * This method updates all the moving components of the game by determining
+      * if the speed needs to change and/or if statements should be removed from the list
+      * of statements
+     */
     public void update() {
+        // If game is over, no need to update
+        if(!this.update)
+            return;
+
         ListIterator<Statement> list;
         int count = 0;
+
+        speedUp();
 
         synchronized (statementList) {
             // This variable will track the height of the last statement that is in the
             // iterator. At that point the additional statements will get added
             int lastY = 0;
-
             list = statementList.listIterator();
 
+            // Iterate through the statement list and update the speed of statement
+            // or clear out statements
             while (list.hasNext()) {
                 // check collision with top wall if heading up
                 Statement s = list.next();
 
                 int stopAt = scorePanel + (count * s.getBitmap().getHeight() + OFFSET * count++);
+
+                s.getSpeed().setYv(curSpeed);
 
                 if (s.destroy()) {
                     // pop statement from the linkedlist
@@ -274,13 +273,11 @@ public class GamePanel extends Activity implements
                 } else if (s.getSpeed().getyDirection() == Speed.DIRECTION_UP
                         && s.getY() - s.getBitmap().getHeight() / 2 <= stopAt) {
 
-
                     s.stopMoving();
-                    //statement.getSpeed().toggleYDirection();
 
                 } else {
                     // Check if something above was cleared up. If so, start moving again
-                    s.getSpeed().setYv(5);
+                    s.getSpeed().setYv(curSpeed);
                 }
 
                 lastY = s.getY();
@@ -290,7 +287,7 @@ public class GamePanel extends Activity implements
 
 
             // If statements has been removed, regenerate
-            for (int i = statementList.size(), c = 1; i < MAX_STATEMENTS; i++, c++) {
+            for (int i = statementList.size(), c = 1; i < maxStatements; i++, c++) {
 
                 Statement statement;
                 statement = new Statement(BitmapFactory.decodeResource(getResources(), R.drawable.statement), 0, 0, score);
@@ -303,6 +300,71 @@ public class GamePanel extends Activity implements
             }
         }
     }
+
+
+    /*
+     * Draws the statements and the score
+     */
+    public void onDraw(Canvas canvas, long timeDiff) {
+        // fills the canvas with background color
+        canvas.drawBitmap(background, 0, 0, null);
+        ListIterator<Statement> list;
+
+        // Draw the score
+        int maxWidth = surface.getWidth()/2;
+        String s = "SCORE: " +  score.getTotalCorrect() + "/" + score.getTotalAnswered();
+
+        Typeface tf = Typeface.create(Typeface.MONOSPACE,Typeface.BOLD_ITALIC);
+
+        int size = 0;
+        Paint paint = new Paint();
+        paint.setTypeface(tf);
+        paint.setColor(Color.WHITE);
+
+        // Determine max text size that fits in the width
+        do {
+            paint.setTextSize(++size);
+        } while(paint.measureText(s) < maxWidth);
+
+        // Draw the score
+        canvas.drawText(s, maxWidth - 100, scorePanel/3, paint);
+
+        // Once the game is over, draw the Game Over animation
+        if (score.getTotalAnswered() - score.getTotalCorrect() == maxStatements){
+            paint.setColor(Color.DKGRAY);
+            String gameOver = "GAME OVER";
+            this.update = false;
+
+            canvas.drawText(gameOver, maxWidth - paint.measureText(gameOver)/2, gameOver_height, paint);
+
+            if (gameOver_height > surface.getHeight() * 3 / 5) {
+                gameOver_height -= 5;
+            }
+
+            // Print the time
+            paint.setColor(Color.WHITE);
+            paint.setTextSize(size * 3 / 5);
+            canvas.drawText("Level:" + this.level + " " + duration(), maxWidth, scorePanel /2, paint );
+
+            //Log.d(TAG, "Game Over - after: " + this.timeDiff);
+        }else{
+            // Print the time
+            this.timeDiff = timeDiff;
+
+            paint.setTextSize(size * 3 / 5);
+            canvas.drawText("Level:" + this.level + " " + duration(), maxWidth, scorePanel / 2, paint);
+        }
+
+        //Iterate through statementList and draw
+        synchronized (statementList) {
+            list = statementList.listIterator();
+
+            while (list.hasNext()) {
+                list.next().draw(canvas);
+            }
+        }
+    }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
