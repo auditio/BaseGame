@@ -212,8 +212,7 @@ public class GamePanel extends Activity implements
             second = timeDiff;
         }else {
             minute = timeDiff/60;
-            timeDiff = timeDiff - minute * 60;
-            second = timeDiff;
+            second = timeDiff - minute * 60;
         }
 
         return String.format("%02d", minute) + ":" + String.format("%02d", second);
