@@ -45,8 +45,18 @@ public class Statement {
     private boolean touched = false;
     private boolean destroy = false;
 
+    // The two variable tracks the life of the statement
+    // Once time runs out the statement is answer is set to incorrect
+    private final long LIFE = 3;
+    private long time;
+    private boolean startime = true;
+
+    // This variable is used to track when the statement blob has entered the screen
+    private int max_y;
+
     /*
-     *
+     * Constructor to set the coordinates of the statement blobs,
+     * the speed of the moving statements and connect to the score class
      */
     public Statement(Bitmap bitmap, int x, int y, Score score) {
         this.bitmap = bitmap;
@@ -167,9 +177,23 @@ public class Statement {
 
     /*
      * Update the statement's speed and direction of movement
+     *
+     * Also check if the statement has outlived its LIFE (5 seconds) on screen
      */
     public void update() {
         y += (speed.getYv() * speed.getyDirection());
+
+        if (y < max_y && startime) {
+            // If here, the statement has entered the screen as the y
+            // coordinate of it is lower than the maximum height of the canvas
+            time = System.currentTimeMillis();
+            startime = false;
+        }else if (startime == false && !isTouched()){
+            if (( System.currentTimeMillis() - time )/1000 == LIFE) {
+                setTouched(true);
+                clearRight();
+            }
+        }
     }
 
 
@@ -269,6 +293,8 @@ public class Statement {
     public void draw(Canvas canvas) {
         int x = this.x - (this.bitmap.getWidth() / 2);
         int y = this.y - (this.bitmap.getHeight() / 2);
+
+        max_y = canvas.getHeight();
 
         int width = canvas.getWidth()/3;
 
